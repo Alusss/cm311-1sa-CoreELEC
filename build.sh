@@ -1,10 +1,10 @@
 #! /bin/sh
-version="20.1-Nexus"
+version="20.2-Nexus"
 source_img_name="CoreELEC-Amlogic-ng.arm-${version}-Generic"
 source_img_file="${source_img_name}.img.gz"
 source_img_url="https://github.com/CoreELEC/CoreELEC/releases/download/${version}/${source_img_name}.img.gz"
 target_img_prefix="CoreELEC-Amlogic-ng.arm-${version}"
-target_img_name="${target_img_prefix}-E900V22C-$(date +%Y.%m.%d)"
+target_img_name="${target_img_prefix}-cm311-1sa-$(date +%Y.%m.%d)"
 mount_point="target"
 common_files="common-files"
 system_root="SYSTEM-root"
@@ -14,7 +14,7 @@ libreelec_path="${system_root}/usr/lib/libreelec"
 config_path="${system_root}/usr/config"
 kodi_userdata="${mount_point}/.kodi/userdata"
 
-echo "Welcome to build CoreELEC for Skyworth E900V22C!"
+echo "Welcome to build CoreELEC for cm311-1sa!"
 echo "Downloading CoreELEC-${version} generic image"
 wget ${source_img_url} -O ${source_img_file} | exit 1
 echo "Decompressing CoreELEC image"
@@ -25,8 +25,8 @@ mkdir ${mount_point}
 echo "Mounting CoreELEC boot partition"
 sudo mount -o loop,offset=4194304 ${source_img_name}.img ${mount_point}
 
-echo "Copying E900V22C DTB file"
-sudo cp ${common_files}/e900v22c.dtb ${mount_point}/dtb.img
+echo "Copying cm311-1sa DTB file"
+sudo cp ${common_files}/cm311-1sa.dtb ${mount_point}/dtb.img
 
 echo "Decompressing SYSTEM image"
 sudo unsquashfs -d ${system_root} ${mount_point}/SYSTEM
@@ -51,9 +51,15 @@ echo "Copying rc_keymap files"
 sudo cp ${common_files}/rc_maps.cfg ${config_path}/rc_maps.cfg
 sudo chown root:root ${config_path}/rc_maps.cfg
 sudo chmod 0664 ${config_path}/rc_maps.cfg
-sudo cp ${common_files}/e900v22c.rc_keymap ${config_path}/rc_keymaps/e900v22c
-sudo chown root:root ${config_path}/rc_keymaps/e900v22c
-sudo chmod 0664 ${config_path}/rc_keymaps/e900v22c
+sudo cp ${common_files}/cm311-1sa.rc_keymap ${config_path}/rc_keymaps/cm311-1sa
+sudo chown root:root ${config_path}/rc_keymaps/cm311-1sa
+sudo chmod 0664 ${config_path}/rc_keymaps/cm311-1sa
+
+echo "Copying hwdb files"
+sudo cp ${common_files}/bt-remote.hwdb ${config_path}/hwdb.d/50-bt-remote.hwdb
+sudo chown root:root ${config_path}/hwdb.d/50-bt-remote.hwdb
+sudo chmod 0644 ${config_path}/hwdb.d/50-bt-remote.hwdb
+
 
 echo "Compressing SYSTEM image"
 sudo mksquashfs ${system_root} SYSTEM -comp lzo -Xalgorithm lzo1x_999 -Xcompression-level 9 -b 524288 -no-xattrs
@@ -63,7 +69,7 @@ sudo dd if=/dev/zero of=${mount_point}/SYSTEM
 sudo sync
 sudo rm ${mount_point}/SYSTEM
 sudo mv SYSTEM ${mount_point}/SYSTEM
-sudo md5sum ${mount_point}/SYSTEM > SYSTEM.md5
+sudo md5sum ${mount_point}/SYSTEM >SYSTEM.md5
 sudo mv SYSTEM.md5 target/SYSTEM.md5
 sudo rm -rf ${system_root}
 
@@ -91,5 +97,4 @@ echo "Rename image file"
 mv ${source_img_name}.img ${target_img_name}.img
 echo "Compressing CoreELEC image"
 gzip ${target_img_name}.img
-sha256sum ${target_img_name}.img.gz > ${target_img_name}.img.gz.sha256
-
+sha256sum ${target_img_name}.img.gz >${target_img_name}.img.gz.sha256
