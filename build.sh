@@ -2,7 +2,7 @@
 version="20.2-Nexus"
 source_img_name="CoreELEC-Amlogic-ng.arm-${version}-Generic"
 source_img_file="${source_img_name}.img.gz"
-source_img_url="https://github.com/CoreELEC/CoreELEC/releases/download/${version}/${source_img_name}.img.gz"
+source_img_url="https://mirror.ghproxy.com/https://github.com/CoreELEC/CoreELEC/releases/download/${version}/${source_img_name}.img.gz"
 target_img_prefix="CoreELEC-Amlogic-ng.arm-${version}"
 target_img_name="${target_img_prefix}-cm311-1sa-$(date +%Y.%m.%d)"
 mount_point="target"
@@ -59,7 +59,6 @@ echo "Copying hwdb files"
 sudo cp ${common_files}/bt-remote.hwdb ${config_path}/hwdb.d/50-bt-remote.hwdb
 sudo chown root:root ${config_path}/hwdb.d/50-bt-remote.hwdb
 sudo chmod 0644 ${config_path}/hwdb.d/50-bt-remote.hwdb
-
 
 echo "Compressing SYSTEM image"
 sudo mksquashfs ${system_root} SYSTEM -comp lzo -Xalgorithm lzo1x_999 -Xcompression-level 9 -b 524288 -no-xattrs
