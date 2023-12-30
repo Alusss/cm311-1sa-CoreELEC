@@ -14,6 +14,6 @@ sudo apt-get update -y
 sudo apt-get install -y make gcc git texinfo gzip squashfs-tools
 ```
 
-2. Clone the repository to the local. `git clone https://github.com/KryptonLee/e900v22c-CoreELEC.git`
+2. Clone the repository to the local. `git clone https://github.com/Alusss/cm311-1sa-CoreELEC.git`
 
-3. Enter the `~/e900v22c-CoreELEC` root directory and run: `./build` to build CoreELEC.
+3. Enter the `~/cm311-1sa-CoreELEC` root directory and run: `./build` to build CoreELEC.
