@@ -23,7 +23,8 @@ gzip -d ${source_img_file} | exit 1
 echo "Creating mount point"
 mkdir ${mount_point}
 echo "Mounting CoreELEC boot partition"
-sudo mount -o loop,offset=4194304 ${source_img_name}.img ${mount_point}
+OFFSET=$(($(fdisk -l -o start ${source_img_name}.img | grep -v "[a-zA-Z]" | grep -v "^$" | head -n1) * 512))
+sudo mount -o loop,offset=${OFFSET} ${source_img_name}.img ${mount_point}
 
 echo "Copying cm311-1sa DTB file"
 sudo cp ${common_files}/cm311-1sa.dtb ${mount_point}/dtb.img
