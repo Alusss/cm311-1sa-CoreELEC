@@ -12,6 +12,7 @@ modules_load_path="${system_root}/usr/lib/modules-load.d"
 systemd_path="${system_root}/usr/lib/systemd/system"
 libreelec_path="${system_root}/usr/lib/libreelec"
 config_path="${system_root}/usr/config"
+firmware_path="${system_root}/usr/lib/kernel-overlays/base/lib/firmware"
 kodi_userdata="${mount_point}/.kodi/userdata"
 
 echo "Welcome to build CoreELEC for cm311-1sa!"
@@ -21,27 +22,16 @@ echo "Decompressing CoreELEC image"
 gzip -d ${source_img_file} | exit 1
 
 echo "Creating mount point"
-mkdir ${mount_point}
+mkdir -p ${mount_point}
 echo "Mounting CoreELEC boot partition"
-OFFSET=$(($(fdisk -l -o start ${source_img_name}.img | grep -v "[a-zA-Z]" | grep -v "^$" | head -n1) * 512))
-sudo mount -o loop,offset=${OFFSET} ${source_img_name}.img ${mount_point}
+offset=$(($(fdisk -l -o start ${source_img_name}.img|grep -v "[a-zA-Z]"|grep -v "^$"|head -n1)*512))
+sudo mount -o loop,offset=${offset} ${source_img_name}.img ${mount_point}
 
 echo "Copying cm311-1sa DTB file"
 sudo cp ${common_files}/cm311-1sa.dtb ${mount_point}/dtb.img
 
 echo "Decompressing SYSTEM image"
 sudo unsquashfs -d ${system_root} ${mount_point}/SYSTEM
-
-echo "Copying modules-load conf for uwe5621ds"
-sudo cp ${common_files}/wifi_dummy.conf ${modules_load_path}/wifi_dummy.conf
-sudo chown root:root ${modules_load_path}/wifi_dummy.conf
-sudo chmod 0664 ${modules_load_path}/wifi_dummy.conf
-
-echo "Copying systemd service file for uwe5621ds"
-sudo cp ${common_files}/sprd_sdio-firmware-aml.service ${systemd_path}/sprd_sdio-firmware-aml.service
-sudo chown root:root ${systemd_path}/sprd_sdio-firmware-aml.service
-sudo chmod 0664 ${systemd_path}/sprd_sdio-firmware-aml.service
-sudo ln -s ../sprd_sdio-firmware-aml.service ${systemd_path}/multi-user.target.wants/sprd_sdio-firmware-aml.service
 
 echo "Copying fs-resize script"
 sudo cp ${common_files}/fs-resize ${libreelec_path}/fs-resize
@@ -52,14 +42,20 @@ echo "Copying rc_keymap files"
 sudo cp ${common_files}/rc_maps.cfg ${config_path}/rc_maps.cfg
 sudo chown root:root ${config_path}/rc_maps.cfg
 sudo chmod 0664 ${config_path}/rc_maps.cfg
-sudo cp ${common_files}/cm311-1sa.rc_keymap ${config_path}/rc_keymaps/cm311-1sa
-sudo chown root:root ${config_path}/rc_keymaps/cm311-1sa
-sudo chmod 0664 ${config_path}/rc_keymaps/cm311-1sa
+sudo cp ${common_files}/e900v22c.rc_keymap ${config_path}/rc_keymaps/e900v22c
+sudo chown root:root ${config_path}/rc_keymaps/e900v22c
+sudo chmod 0664 ${config_path}/rc_keymaps/e900v22c
 
 echo "Copying hwdb files"
 sudo cp ${common_files}/bt-remote.hwdb ${config_path}/hwdb.d/50-bt-remote.hwdb
 sudo chown root:root ${config_path}/hwdb.d/50-bt-remote.hwdb
 sudo chmod 0644 ${config_path}/hwdb.d/50-bt-remote.hwdb
+
+
+echo "Copying firmware files"
+sudo ln -s ../rtl_bt/rtl8761b_config.bin ${firmware_path}/rtlbt/rtl8761b_config
+sudo ln -s ../rtl_bt/rtl8761b_fw.bin ${firmware_path}/rtlbt/rtl8761b_fw
+sudo ln -s ../rtkbt-firmware-aml.service ${systemd_path}/multi-user.target.wants/rtkbt-firmware-aml.service
 
 echo "Compressing SYSTEM image"
 sudo mksquashfs ${system_root} SYSTEM -comp lzo -Xalgorithm lzo1x_999 -Xcompression-level 9 -b 524288 -no-xattrs
@@ -69,14 +65,15 @@ sudo dd if=/dev/zero of=${mount_point}/SYSTEM
 sudo sync
 sudo rm ${mount_point}/SYSTEM
 sudo mv SYSTEM ${mount_point}/SYSTEM
-sudo md5sum ${mount_point}/SYSTEM >SYSTEM.md5
+sudo md5sum ${mount_point}/SYSTEM > SYSTEM.md5
 sudo mv SYSTEM.md5 target/SYSTEM.md5
 sudo rm -rf ${system_root}
 
 echo "Unmounting CoreELEC boot partition"
 sudo umount -d ${mount_point}
 echo "Mounting CoreELEC data partition"
-sudo mount -o loop,offset=541065216 ${source_img_name}.img ${mount_point}
+offset=$(($(fdisk -l -o start ${source_img_name}.img|grep -v "[a-zA-Z]"|grep -v "^$"|head -n2|tail -n1)*512))
+sudo mount -o loop,offset=${offset} ${source_img_name}.img ${mount_point}
 
 echo "Creating keymaps directory for kodi"
 sudo mkdir -p -m 0755 ${kodi_userdata}/keymaps
@@ -97,4 +94,5 @@ echo "Rename image file"
 mv ${source_img_name}.img ${target_img_name}.img
 echo "Compressing CoreELEC image"
 gzip ${target_img_name}.img
-sha256sum ${target_img_name}.img.gz >${target_img_name}.img.gz.sha256
+sha256sum ${target_img_name}.img.gz > ${target_img_name}.img.gz.sha256
+

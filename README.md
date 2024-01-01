@@ -1,19 +1,25 @@
-# Build CoreELEC for cm311-1sa
-CoreELEC is a 'Just enough OS' Linux distribution for running the award-winning [Kodi](https://kodi.tv) software on popular low-cost hardware. CoreELEC is a minor fork of [LibreELEC](https://libreelec.tv), it's built by the community for the community. [CoreELEC website](http://coreelec.org).  
+# CM311-1a-CoreELEC
+适用于**魔百和CM311-1a**的CoreELEC打包脚本，开启蓝牙，增加蓝牙遥控器支持，改了一下LED指示灯
 
-## Device tree file for cm311-1sa
-The device tree file in source code `common-files/e900v22c.dtb` has fixed the frequency of the uwe5621ds chip for skyworth e900v22c tv box, and it has been packed into the image file as `dtb.img`. Do not use the device tree file `device_tress/g12a_s905x2_2g.dtb` in the boot partition for skyworth e900v22c, otherwise the WIFI will fail. More seriously the system will crash.
+在 [KryptonLee/e900v22c-CoreELEC](https://github.com/KryptonLee/e900v22c-CoreELEC.git) 的基础上进行了修改
 
-## Remote keymap files
-The remote keymap files has been packed into the image file. Unfortunately the numeric keys are not working with the virtual keyboard.
+`common-files/{advancedsettings.xml,backspace.xml,e900v22c.rc_keymap,fs-resize,rc_maps.cfg}` 来自于 [KryptonLee/e900v22c-CoreELEC](https://github.com/KryptonLee/e900v22c-CoreELEC.git)
 
-## Build instructions
-1. Install the necessary packages (E.g Ubuntu 20.04 LTS user)
-```yaml
+`common-files/bt-remote.hwdb` 为蓝牙遥控器按键文件
+
+`common-files/ccm311-1a.dtb` 是盒子的dtb文件，由于CM311-1a没有wifi,dtb中删除了关于wifi部分
+
+用法 (Ubuntu 20.04 LTS)
+```
 sudo apt-get update -y
 sudo apt-get install -y make gcc git texinfo gzip squashfs-tools
 ```
 
-2. Clone the repository to the local. `git clone https://github.com/Alusss/cm311-1sa-CoreELEC.git`
+```
+cd ~
 
-3. Enter the `~/cm311-1sa-CoreELEC` root directory and run: `./build` to build CoreELEC.
+git clone https://github.com/alahei/CM311-1a-CoreELEC.git
+cd CM311-1a-CoreELEC
+sh build.sh
+```
+有可能需要输入sudo密码
